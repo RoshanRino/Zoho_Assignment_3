@@ -2,9 +2,13 @@
 #include<map>
 #include<vector>
 #include<fstream>
+#include "Machine.pb.h"
+#include "users.pb.h"
 using namespace std;
 fstream fileEdit;
 map<int,int> atmData;
+class Customer;
+map<int, Customer> customerData;
 
 
 class Customer
@@ -19,13 +23,21 @@ class Customer
         pin=b;
         balance=c;
     }
-    void writeData()
+    static void writeData()
     {
-        fileEdit.width(20);fileEdit.fill(' ');
-        fileEdit<<name;
-        fileEdit.width(20);fileEdit.fill(' ');
-        fileEdit<<pin;
-        fileEdit<<balance;
+        UserData::Users people;
+        map<int, Customer>::iterator i = customerData.begin();
+        while (i != customerData.end())
+        {
+            UserData::User* ptr =people.add_users();
+            ptr->set_accountnumber(i->first);
+            ptr->set_name(i->second.name);
+            ptr->set_balance(i->second.balance);
+            ptr->set_pin(i->second.pin);
+            i++;
+        }
+        fstream output2("User_Data.bin", ios::out | ios::trunc | ios::binary);
+        people.SerializeToOstream(&output2);
     }
     void display()
     {

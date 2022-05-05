@@ -1,0 +1,12 @@
+syntax ="proto3";
+
+package Machine;
+
+message MachineData{
+	optional int32 denomination =1;
+	optional int32 count =2;
+}
+
+message MachineDatas{
+	repeated MachineData Mdata =1;
+}

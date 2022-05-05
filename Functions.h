@@ -1,32 +1,38 @@
 #include "Class_Customer.h"
-map<int,Customer> customerData;
+//map<int,Customer> customerData;
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-void readAtmDetails()
+void readData()
 {
-    fileEdit.open("Atm_Data.txt",ios::in);
-    int deno,number,temp;
-    string temp2;
-    while(fileEdit>>deno>>number>>temp>>temp2)
-        atmData[deno]=number;
-    fileEdit.close();
+    Machine::MachineDatas AtmData;
+    fstream input("Atm_Data.bin", ios::in | ios::binary);
+    AtmData.ParseFromIstream(&input);
+    for (auto iter = AtmData.mdata().begin(); iter != AtmData.mdata().end(); iter++)
+        atmData[iter->denomination()] = iter->count();
+
+    UserData::Users customer;
+    fstream input2("User_Data.bin", ios::in | ios::binary);
+    customer.ParseFromIstream(&input2);
+    for (auto iter = customer.users().begin(); iter != customer.users().end(); iter++)
+        customerData[iter->accountnumber()].storeData(iter->name(), iter->pin(),iter->balance());
 }
-/*---------------------------------------------------------------------------------------------------------------------------*/
-void writeAtmDetails()
+void writeData()
 {
-    fileEdit.open("Atm_Data.txt",ios::out);
-    map<int,int>::iterator i = atmData.begin();
-    while(i!=atmData.end())
+    Machine::MachineDatas AtmData;
+    map<int, int>::iterator i = atmData.begin();
+    while (i != atmData.end())
     {
-        fileEdit.width(20);fileEdit.fill(' ');
-        fileEdit<<left<<i->first;
-        fileEdit.width(20);fileEdit.fill(' ');
-        fileEdit<<i->second;
-        fileEdit<<(i->first)*(i->second)<<" ₹"<<endl;
+        Machine::MachineData* ptr;
+        ptr = AtmData.add_mdata();
+        ptr->set_denomination(i->first);
+        ptr->set_count(i->second);
         i++;
     }
-    fileEdit.close();
+    fstream output("Atm_Data.bin", ios::out | ios::trunc | ios::binary);
+    AtmData.SerializeToOstream(&output);
+    Customer::writeData();
 }
+
 /*---------------------------------------------------------------------------------------------------------------------------*/
 void printAtmData()
 {
@@ -41,33 +47,7 @@ void printAtmData()
         i++;
     }
 }
-/*---------------------------------------------------------------------------------------------------------------------------*/
-void readCustomerDetails()
-{
-    fileEdit.open("Customer_Data.txt",ios::in);
-    int acc,pin,bal;
-    string name,temp;
-    while(fileEdit>>acc>>name>>pin>>bal>>temp)
-    {
-        customerData[acc].storeData(name,pin,bal);
-    }
-    fileEdit.close();
-}
-/*---------------------------------------------------------------------------------------------------------------------------*/
-void writeCustomerDetails()
-{
-    fileEdit.open("Customer_Data.txt",ios::out);
-    map<int,Customer>::iterator i = customerData.begin();
-    while(i!=customerData.end())
-    {
-        fileEdit.width(20);fileEdit.fill(' ');
-        fileEdit<<left<<i->first;
-        i->second.writeData();
-        fileEdit<<" ₹"<<endl;
-        i++;
-    }
-    fileEdit.close();
-}
+
 /*---------------------------------------------------------------------------------------------------------------------------*/
 void updateCash()
 {
@@ -188,7 +168,7 @@ void withdrawMoney(int acc)
     else
     {
 
-        int h,tt,fh,temp=amount;
+        int h=0,tt=0,fh=0,temp=amount;
         if(amount>=5000)
         {
             tt=amount/2000;
@@ -231,7 +211,7 @@ void atmProcess(int acc)
     int temp;
     while(1)
     {
-        writeCustomerDetails();
+        writeData();
         cout<<"Press 1 to Check Balance"<<endl;
         cout<<"Press 2 to Withdraw Money"<<endl;
         cout<<"Press 3 to Transfer Money"<<endl;

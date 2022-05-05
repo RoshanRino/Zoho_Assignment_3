@@ -1,12 +1,11 @@
 #include "Functions.h"
 int main()
 {
-    readAtmDetails();
-    readCustomerDetails();
+    readData();
     int input;
     while(1)
     {
-        writeAtmDetails();
+        writeData();
         cout<<"Press 1 to Load Cash in ATM"<<endl;
         cout<<"Press 2 to Show Customer Details"<<endl;
         cout<<"Press 3 to Show ATM operations"<<endl;
